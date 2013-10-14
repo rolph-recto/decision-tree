@@ -4,6 +4,8 @@ decision_tree.py
 Decision tree classifier
 """
 
+from __future__ import division
+
 from id3 import id3
 
 class Feature(object):
@@ -117,7 +119,7 @@ class DecisionTree(object):
 
         # iterate through the dataset and categorize the entries
         for data in dataset:
-            partition[data[0][feature.name]].append(data)
+            partition[data[0][feature.name]]["dataset"].append(data)
 
         # assign a label for each subset
         for value in feature.values:
@@ -130,7 +132,7 @@ class DecisionTree(object):
                 for label in self._labels
             ]
             # return the label with the most data entries associated with it
-            label = max(label_count, lambda tup: tup[1])[0]
+            label = max(label_count, key=lambda tup: tup[1])[0]
             partition[value]["label"] = label
 
         return partition
@@ -163,7 +165,7 @@ class DecisionTree(object):
             # find all possible values of a feature by looking at all the 
             # feature values that occur in the dataset
             for data in dataset:
-                values.add(data[feature_name])
+                values.add(data[0][feature_name])
 
             # now add the feature to the feature set
             feature = Feature(feature_name, values)
@@ -219,10 +221,37 @@ class DecisionTree(object):
         """
         given a set of features, return a label
         """
-        
         node = self._root
-        while (node.edge(data[node.name]).dest is not None):
+        while node.edge(data[node.name]) is not None and \
+        node.edge(data[node.name]).dest is not None:
             node = node.edge(data[node.name]).dest
 
-        return node.edge(data[node.name]).label
+        if node.edge(data[node.name]) is not None:
+            return node.edge(data[node.name]).label
+        # the data has a feature that hasn't been encountered by the tree;
+        else:
+            return None
+
+    def evaluate(self, dataset):
+        """
+        evaluate accuracy of classifier by comparing results with a
+        classified dataset
+
+        returns a tuple (a,b) where
+        a = proportion of dataset correctly classified
+        b = proportion of dataset unable to be classified
+            (the data has previously unseen features)
+        """
+        correct = 0
+        nones = 0
+        for feature, label in dataset:
+            classification = self.classify(feature)
+            if classification == label:
+                correct += 1
+            elif classification == None:
+                nones += 1
+
+        return correct / len(dataset), nones / len(dataset)
+
+
 

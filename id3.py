@@ -63,4 +63,4 @@ def id3(features, dataset):
         feature_entropy_list.append((feature, feature_entropy)) 
 
     # return the feature with the least entropy
-    return min(feature_entropy_list, lambda tup: tup[1])[0]
+    return min(feature_entropy_list, key=lambda tup: tup[1])[0]
