@@ -8,30 +8,6 @@ from __future__ import division
 
 from id3 import id3
 
-class Feature(object):
-    """
-    data feature (i.e., metadata)
-    this is used as nodes for the decision tree
-    """
-
-    def __init__(self, name, values):
-        self._name = name
-        self._values = values.copy()
-
-    @property
-    def name(self):
-        """
-        getter for name
-        """
-        return self._name
-
-    @property
-    def values(self):
-        """
-        getter for values set
-        """
-        return self._values.copy()
-
 
 class DecisionTreeEdge(object):
     """
@@ -57,7 +33,7 @@ class DecisionTreeNode(object):
     if the node is a leaf, a classification label
     """
     def __init__(self, feature):
-        self._name = feature.name
+        self._name = feature["name"]
         self._edges = {}
 
     @property
@@ -111,20 +87,14 @@ class DecisionTree(object):
         """
         partition = {}
 
-        # build empty lists for each possible value
-        for value in feature.values:
+        # categorize the entries in the dataset and attach a label to each
+        # feature value
+        for value in feature["values"]:
             partition[value] = {}
-            partition[value]["dataset"] = []
-            partition[value]["label"] = ""
+            partition[value]["dataset"] = [data for data in dataset
+                if data[0][feature["name"]] == value]
 
-        # iterate through the dataset and categorize the entries
-        for data in dataset:
-            partition[data[0][feature.name]]["dataset"].append(data)
-
-        # assign a label for each subset
-        for value in feature.values:
             val_dataset = partition[value]["dataset"]
-
             # build a list of tuples containing labels and the number
             # of data entries with that label
             label_count = [
@@ -151,7 +121,7 @@ class DecisionTree(object):
         build feature descriptions from the training data
         """
         # clear the previous set of features, if there was one
-        self._features = set()
+        self._features = {}
 
         # fair assumption that there's a least one entry in the dataset
         # and that the feature set is uniform across the dataset
@@ -160,16 +130,18 @@ class DecisionTree(object):
 
         # find all features
         for feature_name in first[0].keys():
-            values = set()
+            values = []
 
             # find all possible values of a feature by looking at all the 
             # feature values that occur in the dataset
             for data in dataset:
-                values.add(data[0][feature_name])
+                values.append(data[0][feature_name])
 
             # now add the feature to the feature set
-            feature = Feature(feature_name, values)
-            self._features.add(feature)
+            self._features[feature_name] = {
+                "name": feature_name,
+                "values": values
+            }
 
     def train(self, dataset):
         """
@@ -197,7 +169,7 @@ class DecisionTree(object):
         # choose a feature using the heuristic and build a node
         feature = self._heuristic(features, dataset)
         unused_features = features.copy()
-        unused_features.remove(feature)
+        unused_features.pop(feature["name"])
         node = DecisionTreeNode(feature)
 
         # split the data by feature value

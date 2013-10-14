@@ -13,17 +13,9 @@ def freq_dist(items):
     return the frequency distribution of a list of items
     """
     num = len(items)
-    dist = dict([(item, 0) for item in set(items)])
-
-    # count the number of items that the labels appear
-    for item in items:
-        dist[item] += 1
-
-    # then, divide all values in fd by n to get the proportion of the label
-    for item in dist.keys():
-        dist[item] = dist[item] / num
-
-    return dist
+    # find the proportion of the labels within the dataset
+    return dict([(item, len([item2 for item2 in items if item2 == item]) / num)
+        for item in set(items)])
 
 
 def entropy(labels):
@@ -39,14 +31,14 @@ def id3(features, dataset):
     """
     feature_entropy_list = []
 
-    for feature in features:
+    for feature in features.values():
         feature_entropy = 0.0
 
         # iterate through each of the feature's possible values
-        for value in feature.values:
+        for value in feature["values"]:
             # retrieve only data entries with a specific value for this feature
             filtered_dataset = [data for data in dataset
-                if data[0][feature.name] == value]
+                if data[0][feature["name"]] == value]
 
             # extract a list of labels from the filtered dataset
             feature_labels = [data[1] for data in filtered_dataset]
