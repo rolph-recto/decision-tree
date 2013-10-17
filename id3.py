@@ -13,17 +13,9 @@ def freq_dist(items):
     return the frequency distribution of a list of items
     """
     num = len(items)
-    dist = dict([(item, 0) for item in set(items)])
-
-    # count the number of items that the labels appear
-    for item in items:
-        dist[item] += 1
-
-    # then, divide all values in fd by n to get the proportion of the label
-    for item in dist.keys():
-        dist[item] = dist[item] / num
-
-    return dist
+    # find the proportion of the labels within the dataset
+    return dict([(item, len([item2 for item2 in items if item2 == item]) / num)
+        for item in set(items)])
 
 
 def entropy(labels):

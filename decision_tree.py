@@ -13,24 +13,9 @@ class Feature(object):
     data feature (i.e., metadata)
     this is used as nodes for the decision tree
     """
-
     def __init__(self, name, values):
-        self._name = name
-        self._values = values.copy()
-
-    @property
-    def name(self):
-        """
-        getter for name
-        """
-        return self._name
-
-    @property
-    def values(self):
-        """
-        getter for values set
-        """
-        return self._values.copy()
+        self.name = name
+        self.values = values.copy()
 
 
 class DecisionTreeEdge(object):
@@ -40,7 +25,6 @@ class DecisionTreeEdge(object):
     (2) a reference to the source/parent node, (3) and the label associated with
     the edge
     """
-
     def __init__(self, source, label, dest=None):
         self.source = source
         self.label = label
@@ -57,15 +41,8 @@ class DecisionTreeNode(object):
     if the node is a leaf, a classification label
     """
     def __init__(self, feature):
-        self._name = feature.name
+        self.name = feature.name
         self._edges = {}
-
-    @property
-    def name(self):
-        """
-        getter for name
-        """
-        return self._name
 
     @property
     def values(self):
